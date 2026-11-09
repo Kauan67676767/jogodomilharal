@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show do Milharal - SENAI Afonso Pena</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2e7d32; --primary-dark: #1b5e20;
+            --accent: #ffd54f; --accent-dark: #ffb300; --danger: #d32f2f;
+            --dark: #212121; --light: #f1f8e9;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
+        body { background: linear-gradient(135deg, #1b5e20, #33691e, #827717); color: var(--dark); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 15px; }
+        .game-container { background: var(--light); width: 100%; max-width: 650px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); overflow: hidden; border: 4px solid var(--accent); display: flex; flex-direction: column; }
+        .game-header { background: linear-gradient(90deg, #ff8f00, #ffb300); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #e65100; }
+        .host-info { display: flex; align-items: center; gap: 10px; }
+        .host-avatar { width: 50px; height: 50px; background: #fff; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 3px 6px rgba(0,0,0,0.2); overflow: hidden; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+        .host-speech { background: #fff; padding: 5px 10px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; color: #d84315; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stats-panel { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+        .lives { font-size: 1.1rem; }
+        .money { background: #1b5e20; color: #fff; padding: 3px 8px; border-radius: 6px; font-family: 'Fredoka One', cursive; font-size: 1rem; }
+        .game-body { padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 380px; justify-content: center; }
+        h1 { font-family: 'Fredoka One', cursive; font-size: 2rem; color: #e65100; text-shadow: 1px 1px 0px #fff; margin-bottom: 10px; }
+        p { font-size: 0.92rem; line-height: 1.45; margin-bottom: 15px; color: #37474f; }
+        .badge-fase { background: #ffb300; color: #fff; padding: 3px 10px; border-radius: 15px; font-weight: bold; font-size: 0.85rem; margin-bottom: 12px; text-transform: uppercase; }
+        .btn { background: linear-gradient(to bottom, #43a047, #2e7d32); color: white; border: none; padding: 12px 24px; font-size: 1rem; font-family: 'Fredoka One', cursive; border-radius: 40px; cursor: pointer; box-shadow: 0 4px 0 #1b5e20, 0 6px 12px rgba(0,0,0,0.2); text-transform: uppercase; margin-top: 10px; }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #1b5e20; }
+        .btn-hard { background: linear-gradient(to bottom, #e53935, #c62828); box-shadow: 0 4px 0 #b71c1c, 0 6px 12px rgba(0,0,0,0.2); }
+        .btn-mode-container { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+        .options-grid { display: grid; gap: 8px; width: 100%; margin-top: 5px; }
+        .option-btn { background: #fff; border: 2px solid #c8e6c9; padding: 9px 12px; text-align: left; border-radius: 10px; font-size: 0.82rem; font-weight: 700; color: #263238; cursor: pointer; transition: 0.15s; }
+        .option-btn.correct { background: #c8e6c9 !important; border-color: #2e7d32 !important; color: #1b5e20 !important; }
+        .option-btn.wrong { background: #ffcdd2 !important; border-color: #d32f2f !important; color: #b71c1c !important; }
+        .game-footer { background: #dcedc8; padding: 8px 16px; font-size: 0.75rem; text-align: center; color: #558b2f; border-top: 2px dashed #c8e6c9; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="host-info">
+                <div class="host-avatar">
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <circle cx="50" cy="50" r="50" fill="#ff8f00"/>
+                        <path d="M 22 55 Q 50 88 78 55 Q 83 38 70 28 Q 50 18 30 28 Q 17 38 22 55 Z" fill="#ffe0b2"/>
+                        <path d="M 22 45 Q 26 32 35 30 Q 28 42 25 52 Z" fill="#212121"/>
+                        <path d="M 78 45 Q 74 32 65 30 Q 72 42 75 52 Z" fill="#212121"/>
+                        <path d="M 12 33 Q 50 8 88 33 Q 86 44 75 40 Q 50 26 25 40 Q 14 44 12 33 Z" fill="#fbc02d"/>
+                        <rect x="33" y="16" width="34" height="12" rx="4" fill="#fbc02d"/>
+                        <ellipse cx="38" cy="43" rx="5" ry="6" fill="#000"/>
+                        <ellipse cx="62" cy="43" rx="5" ry="6" fill="#000"/>
+                        <circle cx="39" cy="41" r="2" fill="#fff"/>
+                        <circle cx="63" cy="41" r="2" fill="#fff"/>
+                        <circle cx="30" cy="50" r="5" fill="#ffab91" opacity="0.6"/>
+                        <circle cx="70" cy="50" r="5" fill="#ffab91" opacity="0.6"/>
+                        <circle cx="50" cy="50" r="3.5" fill="#d7ccc8"/>
+                        <path d="M 40 58 Q 50 68 60 58 Z" fill="#d32f2f"/>
+                        <rect x="47" y="57" width="6" height="5" fill="#fff"/>
+                    </svg>
+                </div>
+                <div class="host-speech" id="host-speech">Escolha seu modo, uai!</div>
+            </div>
+            <div class="stats-panel">
+                <div class="lives" id="lives-display">❤️❤️❤️</div>
+                <div class="money" id="money-display">R$ 0,00</div>
+            </div>
+        </div>
+
+        <div class="game-body" id="game-body">
+            <div id="screen-start">
+                <h1>🌽 Show do Milharal 🌽</h1>
+                <p>Escolha o modo de jogo com o <strong>Chico Bento</strong>:</p>
+                <div class="btn-mode-container">
+                    <button class="btn" onclick="startGame('easy')">Modo Fácil (3 Vidas)</button>
+                    <button class="btn btn-hard" onclick="startGame('hard')">Modo Hard (1 Vida - R$ 1 Milhão)</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-footer">SENAI Afonso Pena • TGDQ | Kauan & Vinícius</div>
+    </div>
+
+    <script>
+        const easyP1 = [
+            { q: "O que significa a sigla EPI?", options: ["Equipamento de Proteção Individual", "Estrutura Padrão Interna", "Escala de Prevenção de Incêndios", "Estatística de Perigo Industrial"], correct: 0 },
+            { q: "Qual o principal objetivo da prevenção de acidentes?", options: ["Aumentar velocidade a qualquer custo", "Garantir a integridade e saúde do trabalhador", "Reduzir gastos com limpeza", "Evitar conversas no expediente"], correct: 1 },
+            { q: "Ao identificar risco iminente em uma máquina, qual a primeira atitude?", options: ["Ignorar e continuar operando", "Tentar consertar sozinho", "Sinalizar e comunicar o responsável", "Esconder o problema"], correct: 2 },
+            { q: "Qual item protege a audição do trabalhador?", options: ["Óculos de sol", "Protetor auricular (abafador/plug)", "Luvas de algodão", "Chapéu de palha"], correct: 1 },
+            { q: "Por que as normas de segurança são obrigatórias?", options: ["Apenas para burocracia", "Para prevenir acidentes e doenças", "Para multar funcionários", "Para enfeitar o local"], correct: 1 }
+        ];
+
+        const easyP2 = [
+            { q: "[CHEFÃO] Em uma obra, operador de serra circular exige quais EPIs?", options: ["Apenas avental leve", "Óculos, protetor auricular e luvas", "Somente botas comuns", "Nenhum EPI"], correct: 1 },
+            { q: "[CHEFÃO] Piso escorregadio detectado em planilha. O que fazer?", options: ["Demitir funcionários", "Sinalizar e aplicar piso antiderrapante", "Apagar dados", "Diminuir iluminação"], correct: 1 },
+            { q: "[CHEFÃO] Atitude segura ao manusear produtos químicos:", options: ["Cheirar o produto", "Usar EPIs da FISPQ e ventilar o local", "Misturar produtos", "Armazenar perto de alimentos"], correct: 1 },
+            { q: "[CHEFÃO] Pico de LER/DORT em gráfico mensal. O que fazer?", options: ["Ignorar dados", "Adequar ergonomia e pausas", "Dobrar a jornada", "Retirar cadeiras"], correct: 1 },
+            { q: "[CHEFÃO] Colega com mal súbito por calor na lavoura. Ação correta:", options: ["Dar remédios sem receita", "Levar para local fresco e buscar socorro", "Deixá-lo trancado", "Jogar água quente"], correct: 1 }
+        ];
+
+        // MODO HARD TÉCNICO COM EMBARALHAMENTO AUTOMÁTICO DE RESPOSTAS
+        const hardP1 = [
+            { 
+                q: "[HARD 1] Ao analisar a planilha de controle de exames ocupacionais, identificou-se ausência de ASO em admitidos. Qual a penalidade administrativa legal cabível?", 
+                options: [
+                    "Advertência verbal coletiva sem registro documental.",
+                    "Autuação imediata pela fiscalização do trabalho e multas previstas na NR-07 por infração à medicina ocupacional.",
+                    "Suspensão temporária do pagamento de impostos municipais.",
+                    "Substituição obrigatória da CIPA por novos membros."
+                ], 
+                correctText: "Autuação imediata pela fiscalização do trabalho e multas previstas na NR-07 por infração à medicina ocupacional."
+            },
+            { 
+                q: "[HARD 2] No mapeamento de riscos ambientais (NR-09), um agente físico do tipo ruído contínuo medido ultrapassou o Nível de Ação. O que deve ser adotado obrigatoriamente?", 
+                options: [
+                    "Apenas monitoramento visual anual sem registros.",
+                    "Concessão imediata de folgas compensatórias aos sábados.",
+                    "Implementação de medidas de controle preventivo, como monitoramento periódico e programas de conservação auditiva (PCA).",
+                    "Redução do quadro funcional do setor ruidoso."
+                ], 
+                correctText: "Implementação de medidas de controle preventivo, como monitoramento periódico e programas de conservação auditiva (PCA)."
+            },
+            { 
+                q: "[HARD 3] Segundo os critérios estatísticos da NBR 14280 para registro de acidentes do trabalho, como são contabilizadas as horas-homem de exposição ao risco (HHT)?", 
+                options: [
+                    "Somente as horas em que o trabalhador está efetivamente executando tarefas perigosas.",
+                    "O somatório das horas de trabalho de todos os empregados em exposição ao risco durante o período considerado.",
+                    "Apenas a jornada oficial contratada em carteira, descontando o horário de almoço.",
+                    "O total de horas pagas pela empresa somando férias e afastamentos médicos."
+                ], 
+                correctText: "O somatório das horas de trabalho de todos os empregados em exposição ao risco durante o período considerado."
+            },
+            { 
+                q: "[HARD 4] Ao gerenciar o fornecimento de EPIs, a empresa constatou que um lote de capacetes classe B perdeu a validade do CA. Qual a conduta gerencial correta?", 
+                options: [
+                    "Doar os equipamentos excedentes para instituições de caridade locais.",
+                    "Recolher imediatamente os EPIs do estoque e dos postos de trabalho, impedindo sua utilização.",
+                    "Continuar utilizando até apresentarem trincas visíveis.",
+                    "Pintar novamente os capacetes para esconder o desgaste."
+                ], 
+                correctText: "Recolher imediatamente os EPIs do estoque e dos postos de trabalho, impedindo sua utilização."
+            },
+            { 
+                q: "[HARD 5] No contexto do PGR (Programa de Gerenciamento de Riscos - NR-01), o inventário de riscos deve contemplar obrigatoriamente:", 
+                options: [
+                    "Caracterização dos processos, ambientes de trabalho, descrição dos perigos e avaliação dos riscos ocupacionais.",
+                    "Apenas o balanço financeiro anual de custos com EPIs.",
+                    "O histórico escolar de todos os colaboradores contratados.",
+                    "O organograma hierárquico da diretoria executiva."
+                ], 
+                correctText: "Caracterização dos processos, ambientes de trabalho, descrição dos perigos e avaliação dos riscos ocupacionais."
+            }
+        ];
+
+        const hardP2 = [
+            { 
+                q: "[CHEFÃO HARD] Conforme a NR-10, para a liberação de serviços em instalações elétricas desenergizadas, qual sequência exata garante a segurança jurídica e física da equipe?", 
+                options: [
+                    "Desligar o disjuntor principal e iniciar o reparo imediatamente.",
+                    "Seccionamento, impedimento de reenergização, constatação de ausência de tensão, aterramento temporário e proteção dos elementos energizados.",
+                    "Apenas verificar a ausência de tensão com multímetro digital comum.",
+                    "Solicitar autorização por telefone ao engenheiro responsável e isolar com fita zebrada."
+                ], 
+                correctText: "Seccionamento, impedimento de reenergização, constatação de ausência de tensão, aterramento temporário e proteção dos elementos energizados."
+            },
+            { 
+                q: "[CHEFÃO HARD] Em uma auditoria de dados de SST, constatou-se que a Taxa de Frequência de acidentes diminuiu, mas a Taxa de Gravidade aumentou exponencialmente. O que isso indica analiticamente?", 
+                options: [
+                    "Que a segurança geral da empresa atingiu o nível máximo de excelência.",
+                    "Que ocorreram menos acidentes no total, porém os que aconteceram foram de gravidade severa (afastamentos prolongados ou incapacidades).",
+                    "Que houve um erro de digitação nas planilhas do SESMT.",
+                    "Que o número de horas trabalhadas dobrou no trimestre."
+                ], 
+                correctText: "Que ocorreram menos acidentes no total, porém os que aconteceram foram de gravidade severa (afastamentos prolongados ou incapacidades)."
+            },
+            { 
+                q: "[CHEFÃO HARD] De acordo com a NR-12, a implementação de sistemas de segurança em zonas de perigo de máquinas deve priorizar quais dispositivos?", 
+                options: [
+                    "Apenas avisos sonoros de advertência em formato de sirene.",
+                    "Proteções fixas, proteções intertravadas e dispositivos de parada de emergência.",
+                    "Pintura colorida em toda a estrutura externa da máquina.",
+                    "Redução da velocidade operacional sem barreiras físicas."
+                ], 
+                correctText: "Proteções fixas, proteções intertravadas e dispositivos de parada de emergência."
+            },
+            { 
+                q: "[CHEFÃO HARD] Em ambientes confinados regidos pela NR-33, qual é a concentração mínima volumétrica de oxigênio (O₂) exigida para a entrada segura de trabalhadores sem risco imediato à vida?", 
+                options: [
+                    "Exatamente 10,0% de O₂.",
+                    "Entre 19,5% e 23,0% de O₂.",
+                    "Acima de 30,5% de O₂.",
+                    "Qualquer percentual desde que haja ventilação natural."
+                ], 
+                correctText: "Entre 19,5% e 23,0% de O₂."
+            },
+            { 
+                q: "[CHEFÃO HARD] O que determina a obrigatoriedade legal da emissão da CAT (Comunicação de Acidente de Trabalho) pela empresa junto ao INSS?", 
+                options: [
+                    "Apenas acidentes que resultem em óbito do colaborador.",
+                    "Qualquer acidente de trabalho ou doença ocupacional que cause ou não afastamento, respeitando os prazos legais estabelecidos.",
+                    "Somente quando o trabalhador solicitar formalmente após 30 dias.",
+                    "A critério exclusivo do médico coordenador do PCMSO."
+                ], 
+                correctText: "Qualquer acidente de trabalho ou doença ocupacional que cause ou não afastamento, respeitando os prazos legais estabelecidos."
+            }
+        ];
+
+        let state = { mode: 'easy', phase: 1, idx: 0, lives: 3, money: 0, p2Correct: 0, currentCorrectIndex: 0 };
+
+        function updateUI() {
+            document.getElementById("lives-display").innerText = "❤️ ".repeat(state.lives).trim();
+            document.getElementById("money-display").innerText = "R$ " + state.money.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        }
+
+        function setSpeech(txt) { 
+            let speechEl = document.getElementById("host-speech");
+            if(speechEl) speechEl.innerText = txt; 
+        }
+
+        function startGame(selectedMode) {
+            state.mode = selectedMode || 'easy';
+            state.phase = 1;
+            state.idx = 0;
+            state.money = 0;
+            state.p2Correct = 0;
+
+            if (state.mode === 'hard') {
+                state.lives = 1;
+                setSpeech("Modo HARD ativado! Só 1 vida, sô!");
+            } else {
+                state.lives = 3;
+                setSpeech("Modo Fácil ativado! Bora lá, uai!");
+            }
+
+            updateUI();
+            loadQ();
+        }
+
+        function getActiveList() {
+            if (state.mode === 'hard') {
+                return state.phase === 1 ? hardP1 : hardP2;
+            } else {
+                return state.phase === 1 ? easyP1 : easyP2;
+            }
+        }
+
+        // Função para embaralhar um array aleatoriamente
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function loadQ() {
+            let list = getActiveList();
+            if (state.idx >= list.length) {
+                if (state.phase === 1) {
+                    state.phase = 2; 
+                    state.idx = 0; 
+                    if (state.mode === 'hard') {
+                        state.money += 400000;
+                        showMsg("Fase 1 Concluída!", "Você faturou R$ 400.000,00 de bônus! Agora encare o CHEFÃO DO HARD!", "Enfrentar Chefão Hard");
+                    } else {
+                        state.money += 300;
+                        showMsg("Fase 1 Concluída!", "Ganhou R$ 300,00 de bônus! Vem aí o Chefão!", "Continuar");
+                    }
+                } else {
+                    let needed = 4;
+                    if (state.p2Correct >= needed) {
+                        if (state.mode === 'hard') {
+                            state.money = 1000000;
+                            updateUI();
+                            showMsg("🏆 MILIONÁRIO DO MILHARAL! 🏆", `Incrível! Você zerou o Modo Hard e conquistou o prêmio máximo de R$ 1.000.000,00!`, "Jogar Novamente", resetToMenu);
+                        } else {
+                            showMsg("🏆 Vitória! 🏆", `Parabéns! Prêmio Total: R$ ${state.money.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`, "Jogar Novamente", resetToMenu);
+                        }
+                    } else {
+                        showMsg("💥 Game Over 💥", "Você não atingiu os acertos necessários no Chefão!", "Tentar Novamente", resetToMenu);
+                    }
+                }
+                return;
+            }
+
+            let q = list[state.idx];
+            setSpeech(state.mode === 'hard' ? "Questão técnica do Hard!" : "Pergunta vai, uai!");
+            
+            // Prepara as opções e descobre qual é a resposta certa independentemente de estar em Hard ou Fácil
+            let optionsCopy = [...q.options];
+            let correctString = state.mode === 'hard' ? q.correctText : q.options[q.correct];
+
+            // Embaralha a ordem das alternativas para que a resposta certa fique em posições aleatórias
+            shuffle(optionsCopy);
+            
+            // Salva qual índice agora é o correto após o embaralhamento
+            state.currentCorrectIndex = optionsCopy.indexOf(correctString);
+
+            let letters = ["A", "B", "C", "D"];
+            let html = `<div class="badge-fase">${state.mode.toUpperCase()} - Fase ${state.phase} (${state.idx + 1}/5)</div><p style="font-weight:700">${q.q}</p><div class="options-grid">`;
+            
+            optionsCopy.forEach((opt, i) => {
+                html += `<button class="option-btn" onclick="answer(${i})">${letters[i]}) ${opt.replace(/^[A-D]\)\s*/, '')}</button>`;
+            });
+
+            document.getElementById("game-body").innerHTML = html + `</div>`;
+        }
+
+        function answer(selected) {
+            let btns = document.querySelectorAll(".option-btn");
+            btns.forEach(b => b.disabled = true);
+
+            if (selected === state.currentCorrectIndex) {
+                btns[selected].classList.add("correct");
+                if (state.mode === 'hard') {
+                    state.money += 120000;
+                } else {
+                    state.money += 100;
+                }
+                if (state.phase === 2) state.p2Correct++;
+                setSpeech("Boa demais, resposta correta!");
+            } else {
+                btns[selected].classList.add("wrong"); 
+                btns[state.currentCorrectIndex].classList.add("correct");
+                state.lives--;
+                setSpeech("Eita, errou a alternativa!");
+            }
+            updateUI();
+
+            if (state.lives <= 0) {
+                setTimeout(() => showMsg("💥 Game Over 💥", state.mode === 'hard' ? "No Modo Hard, errar custou sua única vida!" : "Suas vidas acabaram!", "Tentar Novamente", resetToMenu), 1300);
+                return;
+            }
+            setTimeout(() => { state.idx++; loadQ(); }, 1600);
+        }
+
+        function showMsg(title, text, btnText, callback) {
+            setSpeech("Uai!");
+            window._currentCallback = callback || loadQ;
+            document.getElementById("game-body").innerHTML = `<h1>${title}</h1><p>${text}</p><button class="btn ${state.mode === 'hard' && btnText.includes('Hard') ? 'btn-hard' : ''}" onclick="window._currentCallback()">${btnText}</button>`;
+        }
+
+        function resetToMenu() {
+            state = { mode: 'easy', phase: 1, idx: 0, lives: 3, money: 0, p2Correct: 0, currentCorrectIndex: 0 };
+            updateUI();
+            setSpeech("Escolha seu modo, uai!");
+            document.getElementById("game-body").innerHTML = `
+                <div id="screen-start">
+                    <h1>🌽 Show do Milharal 🌽</h1>
+                    <p>Escolha o modo de jogo com o <strong>Chico Bento</strong>:</p>
+                    <div class="btn-mode-container">
+                        <button class="btn" onclick="startGame('easy')">Modo Fácil (3 Vidas)</button>
+                        <button class="btn btn-hard" onclick="startGame('hard')">Modo Hard (1 Vida - R$ 1 Milhão)</button>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
